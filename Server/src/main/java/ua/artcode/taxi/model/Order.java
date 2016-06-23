@@ -127,4 +127,8 @@ public class Order {
         return "id " + id +
                 ", price " + price + "uah";
     }
+
+    public LocalDateTime getmakeOrderTime() {
+        return makeOrderTime;
+    }
 }

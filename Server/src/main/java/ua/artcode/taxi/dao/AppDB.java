@@ -3,11 +3,12 @@ package ua.artcode.taxi.dao;
 import ua.artcode.taxi.model.Order;
 import ua.artcode.taxi.model.User;
 
+import java.sql.*;
+import java.sql.Date;
 import java.util.*;
 
 public class AppDB {
 
-    private static int userIdCounter = 1;
     private static int orderIdCounter = 1;
     private Map<User, List<Order>> users;
     private Collection<Order> orders;
@@ -46,16 +47,54 @@ public class AppDB {
                 '}';
     }
 
-    public User addUser(User user){
+    public User addUser(User user) {
 
-        user.setId(userIdCounter++);
-        users.put(user, new ArrayList<>());
+        try {
+            Statement statement = DBConnectionFactory.getConnection().createStatement();
+            statement.executeUpdate("INSERT INTO users(id, identifier, phone, password, name, homeAddress) VALUES (" + user.getId() + ", " + user.getIdentifier() + ", " + user.getPhone() + ", " +
+                    "" + user.getPass() + ", " + user.getName() + ", " + user.getHomeAddress() + "");
+
+            DBConnectionFactory.getConnection().commit();
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                DBConnectionFactory.getConnection().close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            } catch (ClassNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        }
 
         return user;
     }
 
-    public Order addOrder(User user, Order order){
+    public Order addOrder(User user, Order order) {
 
+        try {
+            PreparedStatement preparedStatement = DBConnectionFactory.getConnection().prepareStatement("INSER INTO orders(id, orderStatus, from, " +
+                    "to, passenger, driver, distance, price, message, time) VALUES (?,?,?,?,?,?,?,?,?,?)");{
+                preparedStatement.setLong(1, order.getId());
+                preparedStatement.setString(2, "NEW");
+                preparedStatement.setString(3, order.getFrom().toString());
+                preparedStatement.setString(4, order.getTo().toString());
+                preparedStatement.setString(5, order.getPassenger().toString());
+                preparedStatement.setString(6, order.getDriver().toString());
+                preparedStatement.setInt(7, order.getDistance());
+                preparedStatement.setInt(8, order.getPrice());
+                preparedStatement.setString(9, order.getMessage());
+                preparedStatement.setLong(10, System.currentTimeMillis());
+
+                preparedStatement.execute();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         order.setId(orderIdCounter++);
         orders.add(order);
 
@@ -66,7 +105,7 @@ public class AppDB {
         return order;
     }
 
-    public Order findOrder(long id){
+    public Order findOrder(long id) {
         for (Order order : orders) {
             if (order.getId() == id) {
                 return order;
@@ -75,7 +114,7 @@ public class AppDB {
         return null;
     }
 
-    public User findUser(String phone){
+    public User findUser(String phone) {
         for (User user : users.keySet()) {
             if (user.getPhone().equals(phone)) {
                 return user;

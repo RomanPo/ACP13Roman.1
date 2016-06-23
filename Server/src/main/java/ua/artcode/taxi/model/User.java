@@ -40,6 +40,15 @@ public class User implements PassengerActive, DriverActive {
     }
 
     @Override
+    public String toString() {
+        return "User{" +
+                "phone='" + phone + '\'' +
+                ", name='" + name + '\'' +
+                ", homeAddress=" + homeAddress +
+                '}';
+    }
+
+    @Override
     public int getId() {
         return id;
     }
